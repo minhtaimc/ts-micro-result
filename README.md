@@ -31,6 +31,34 @@ function handleResult(result: Result<string>) {
     console.log("Error:", result.error.code, result.error.message);
   }
 }
+
+// Common ErrorDetail examples
+const commonErrors = {
+  VALIDATION_ERROR: {
+    code: "VALIDATION_ERROR",
+    message: "Invalid input data"
+  },
+  NOT_FOUND: {
+    code: "NOT_FOUND", 
+    message: "Resource not found"
+  },
+  UNAUTHORIZED: {
+    code: "UNAUTHORIZED",
+    message: "Access denied"
+  },
+  INTERNAL_ERROR: {
+    code: "INTERNAL_ERROR",
+    message: "Internal server error"
+  },
+  NETWORK_ERROR: {
+    code: "NETWORK_ERROR",
+    message: "Network connection failed"
+  }
+} as const;
+
+// Using predefined errors
+const userNotFound = err(commonErrors.NOT_FOUND);
+const validationFailed = err(commonErrors.VALIDATION_ERROR);
 ```
 
 ## API
