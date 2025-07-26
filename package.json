@@ -1,6 +1,6 @@
 {
   "name": "ts-micro-result",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A lightweight TypeScript Result type implementation for error handling",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -41,4 +41,4 @@
     "url": "https://github.com/minhtaimc/ts-micro-result/issues"
   },
   "homepage": "https://github.com/minhtaimc/ts-micro-result#readme"
-} 
+}
