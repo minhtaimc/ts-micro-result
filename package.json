@@ -23,7 +23,7 @@
     "either",
     "monad"
   ],
-  "author": "",
+  "author": "minhtaimc",
   "license": "MIT",
   "devDependencies": {
     "@types/jest": "^29.5.0",
