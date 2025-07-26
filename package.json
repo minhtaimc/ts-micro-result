@@ -1,0 +1,44 @@
+{
+  "name": "ts-micro-result",
+  "version": "1.0.0",
+  "description": "A lightweight TypeScript Result type implementation for error handling",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "clean": "rimraf dist",
+    "prepublishOnly": "npm run clean && npm run build",
+    "test": "jest",
+    "test:watch": "jest --watch"
+  },
+  "keywords": [
+    "typescript",
+    "result",
+    "error-handling",
+    "functional-programming",
+    "either",
+    "monad"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/jest": "^29.5.0",
+    "@types/node": "^20.0.0",
+    "jest": "^29.5.0",
+    "rimraf": "^5.0.0",
+    "ts-jest": "^29.1.0",
+    "typescript": "^5.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/minhtaimc/ts-micro-result.git"
+  },
+  "bugs": {
+    "url": "https://github.com/minhtaimc/ts-micro-result/issues"
+  },
+  "homepage": "https://github.com/minhtaimc/ts-micro-result#readme"
+} 
