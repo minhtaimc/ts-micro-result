@@ -59,6 +59,40 @@ const commonErrors = {
 // Using predefined errors
 const userNotFound = err(commonErrors.NOT_FOUND);
 const validationFailed = err(commonErrors.VALIDATION_ERROR);
+
+// Field-level errors with path
+const fieldErrors = {
+  email: {
+    code: "VALIDATION_ERROR",
+    message: "Invalid email format",
+    path: "email"
+  },
+  password: {
+    code: "VALIDATION_ERROR", 
+    message: "Password must be at least 8 characters",
+    path: "password"
+  },
+  age: {
+    code: "VALIDATION_ERROR",
+    message: "Age must be a positive number",
+    path: "age"
+  }
+} as const;
+
+// Using field-level errors
+const emailError = err(fieldErrors.email);
+const passwordError = err(fieldErrors.password);
+
+// Handling field-level errors
+function handleValidationError(result: Result<string>) {
+  if (result.isError()) {
+    if (result.error.path) {
+      console.log(`Field error at ${result.error.path}:`, result.error.message);
+    } else {
+      console.log("General error:", result.error.message);
+    }
+  }
+}
 ```
 
 ## API
@@ -66,7 +100,7 @@ const validationFailed = err(commonErrors.VALIDATION_ERROR);
 ### Types
 
 - `Result<T>` - Union type representing either success or error
-- `ErrorDetail` - Error information structure
+- `ErrorDetail` - Error information structure with optional path for field-level errors
 
 ### Functions
 

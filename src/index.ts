@@ -1,6 +1,7 @@
-export type ErrorDetail = {
-  code: string
-  message: string
+export interface ErrorDetail {
+  code: string;
+  message: string;
+  path?: string; // optional, for field-level error
 }
 
 type Ok<T> = {
