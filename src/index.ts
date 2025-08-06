@@ -1,7 +1,12 @@
-export interface ErrorDetail {
-  code: string;
+export interface ErrorIssue {
+  path: string; 
   message: string;
-  path?: string; // optional, for field-level error
+}
+
+export interface ErrorDetail {
+  code?: string;
+  message: string;
+  issues?: ErrorIssue[]; // optional
 }
 
 type Ok<T> = {
@@ -41,4 +46,8 @@ export const err = (error: ErrorDetail): Result<never> =>
   createResult({
     ok: false,
     error
-  }) 
+  })
+
+export const hasIssues = (error: ErrorDetail): boolean => {
+  return error.issues !== undefined && error.issues.length > 0
+} 
