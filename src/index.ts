@@ -106,7 +106,11 @@ export function validationErrors(
 
 export function inferStatus<T>(result: Result<T>): number {
   if (result.status) return result.status
-  if (result.isOk()) return 200
+  if (result.isOk()) {
+    // Nếu không có data thì trả về 204 No Content
+    if (result.data === null || result.data === undefined) return 204
+    return 200
+  }
   const critical = result.errors.find(error => error.status && error.status >= 500)
   if (critical) return 500
   return result.errors[0]?.status ?? 400
