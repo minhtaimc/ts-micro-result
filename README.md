@@ -3,6 +3,7 @@
 A tiny Result toolkit for TypeScript services, SDKs, and background jobs. Ship a single union for success, warnings, and failures that travels well across HTTP, gRPC, queues, CLIs, or any other channel you need.
 
 [![npm version](https://img.shields.io/npm/v/ts-micro-result.svg)](https://www.npmjs.com/package/ts-micro-result)
+![npm bundle size](https://img.shields.io/bundlephobia/min/ts-micro-mediator)
 [![npm downloads](https://img.shields.io/npm/dm/ts-micro-result.svg)](https://www.npmjs.com/package/ts-micro-result)
 [![license](https://img.shields.io/npm/l/ts-micro-result.svg)](https://github.com/minhtaimc/ts-micro-result/blob/main/LICENSE)
 
@@ -46,7 +47,6 @@ if (result.isOkWithData()) {
 - ✅ **Type-safe** - Full TypeScript support with smart type guards
 - ✅ **Error templates** - Dynamic messages with autocomplete: `'User {id} not found'`
 - ✅ **Error chaining** - Track error causes through your app layers
-- ✅ **Compact format** - 30-40% smaller JSON for network transmission
 - ✅ **Functional** - `map` and `flatMap` for composable operations
 - ✅ **Edge optimized** - 70% less memory, tree-shakeable, ~3KB gzipped
 - ✅ **Framework agnostic** - Works everywhere
@@ -356,7 +356,7 @@ createResult({ id: 1 }, [], 200, { traceId: 'abc-123' })
 
 #### `fromJson(json)`
 
-Parse JSON to Result. Auto-detects compact and normal formats.
+Parse JSON to Result. 
 
 ```typescript
 const result = fromJson('{"errors":[{"code":"ERROR","message":"Failed"}]}')
@@ -402,7 +402,7 @@ const custom = ok(data, undefined, 201)
 inferStatus(custom)  // 201
 ```
 
-#### `toHttpResponse(result, compact?)`
+#### `toHttpResponse(result)`
 
 Convert a Result to HTTP response format with automatic status inference.
 
@@ -414,12 +414,6 @@ app.get('/api/users/:id', async (req, res) => {
   const result = await getUser(req.params.id)
   const { status, body } = toHttpResponse(result)
   res.status(status).json(body)
-})
-
-// With compact format for bandwidth savings
-const { status, body } = toHttpResponse(result, true)
-res.status(status).json(body)
-```
 
 ### Result Methods
 
@@ -485,13 +479,12 @@ getUser(1)
   .map(company => company.name)
 ```
 
-#### `toJSON(compact?)`
+#### `toJSON()`
 
-Serialize to JSON. Use `compact: true` to save 30-40% bandwidth.
+Serialize Result to JSON format.
 
 ```typescript
-result.toJSON()      // Normal format
-result.toJSON(true)  // Compact format
+result.toJSON()  // Returns JSON object
 ```
 
 ---
@@ -698,57 +691,7 @@ if (result.isOk()) {
 - `isOk()` - When null data is acceptable (e.g., DELETE operations)
 - `isOkWithData()` - When you need actual data (e.g., GET operations)
 
-### 5. Optimize Network Transmission with Compact Format
-
-Use compact format to reduce JSON payload size by 30-40%.
-
-```typescript
-const result = err({ code: 'NOT_FOUND', message: 'User not found', status: 404 })
-
-// Normal format (readable, for logs)
-result.toJSON()
-// { "errors": [{ "code": "NOT_FOUND", "message": "User not found", "status": 404 }] }
-
-// Compact format (smaller, for network)
-result.toJSON(true)
-// { "errors": [{ "c": "NOT_FOUND", "m": "User not found", "s": 404 }] }
-```
-
-**Field mapping:** `code→c`, `message→m`, `status→s`, `path→p`, `level→l`, `meta→meta`, `cause→cause`
-
-**When to use compact format:**
-- ✅ API responses over HTTP/WebSocket
-- ✅ Edge functions with bandwidth limits
-- ✅ Mobile apps with slow connections
-- ✅ High-traffic endpoints
-
-**When to use normal format:**
-- ✅ Server logs (readability)
-- ✅ Development/debugging
-- ✅ Error reporting services
-
-**Auto-detecting parser:**
-```typescript
-// Parser handles both formats automatically
-fromJson('{"errors":[{"code":"ERROR","message":"Failed"}]}')  // ✅ Normal
-fromJson('{"errors":[{"c":"ERROR","m":"Failed"}]}')           // ✅ Compact
-```
-
-**Real-world example:**
-```typescript
-// API endpoint
-app.get('/api/users', async (req, res) => {
-  const result = await getUsers()
-  res.json(result.toJSON(true))  // Compact for network
-})
-
-// Logging
-if (!result.isOk()) {
-  logger.error('Failed to get users', result.toJSON())  // Normal for logs
-}
-```
-
-### 6. Leverage Functional Composition
+### 5. Leverage Functional Composition
 
 Use `map` and `flatMap` for clean, composable data transformations.
 

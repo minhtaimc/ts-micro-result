@@ -1,14 +1,35 @@
 {
   "name": "ts-micro-result",
-  "version": "2.1.0",
+  "version": "2.1.1",
   "description": "Result toolkit for TypeScript services, SDKs, and background jobs",
+  "type": "module",
   "main": "dist/index.js",
+  "module": "dist/index.js",
   "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./core/*": {
+      "import": "./dist/core/*.js",
+      "types": "./dist/core/*.d.ts"
+    },
+    "./factories/*": {
+      "import": "./dist/factories/*.js",
+      "types": "./dist/factories/*.d.ts"
+    },
+    "./utils/*": {
+      "import": "./dist/utils/*.js",
+      "types": "./dist/utils/*.d.ts"
+    }
+  },
   "files": [
     "dist"
   ],
   "scripts": {
-    "build": "tsc",
+    "build": "tsc && npm run minify",
+    "minify": "terser dist/index.js dist/core/result.js dist/core/types.js dist/factories/ok.js dist/factories/err.js dist/factories/errors.js dist/factories/validation.js dist/utils/guards.js dist/utils/http.js dist/utils/serialization.js --compress --mangle --module -d dist",
     "dev": "tsc --watch",
     "clean": "rimraf dist",
     "prepublishOnly": "npm run clean && npm run build"
@@ -25,6 +46,7 @@
   "license": "MIT",
   "devDependencies": {
     "rimraf": "^5.0.0",
+    "terser": "^5.44.0",
     "typescript": "^5.0.0"
   },
   "repository": {

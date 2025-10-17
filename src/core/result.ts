@@ -1,43 +1,8 @@
 import type { ErrorDetail, Result, ResultMeta } from './types'
 
 // Status code constants for performance
-const STATUS_OK = 200
-const STATUS_NO_CONTENT = 204
-const STATUS_BAD_REQUEST = 400
+
 const STATUS_SERVER_ERROR = 500
-
-// Compact error format helpers
-function compactError(error: ErrorDetail): any {
-  const compact: any = {
-    c: error.code,
-    m: error.message
-  }
-  
-  if (error.status !== undefined) compact.s = error.status
-  if (error.path) compact.p = error.path
-  if (error.level) compact.l = error.level
-  if (error.meta) compact.meta = error.meta
-  if (error.cause) compact.cause = compactError(error.cause)
-  
-  return compact
-}
-
-export function expandError(compact: any): ErrorDetail {
-  const error: ErrorDetail = {
-    code: compact.c || compact.code,
-    message: compact.m || compact.message
-  }
-  
-  if (compact.s !== undefined || compact.status !== undefined) {
-    error.status = compact.s ?? compact.status
-  }
-  if (compact.p || compact.path) error.path = compact.p ?? compact.path
-  if (compact.l || compact.level) error.level = compact.l ?? compact.level
-  if (compact.meta) error.meta = compact.meta
-  if (compact.cause) error.cause = expandError(compact.cause)
-  
-  return error
-}
 
 export class ResultImpl<T> implements Result<T> {
   public readonly data: T | null
@@ -82,14 +47,9 @@ export class ResultImpl<T> implements Result<T> {
     return false
   }
 
-  toJSON(compact?: boolean): object {
-    const result: any = {}
-    
-    // Handle errors - compact or normal format
-    if (compact) {
-      result.errors = this.errors.map(e => compactError(e))
-    } else {
-      result.errors = this.errors
+  toJSON(): object {
+    const result: any = {
+      errors: this.errors
     }
     
     if (this.data != null) result.data = this.data

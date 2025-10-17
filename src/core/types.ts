@@ -30,7 +30,7 @@ export interface Result<T> {
   isOkWithData(): this is { data: NonNullable<T>; errors: [] }
   isError(): boolean
   hasWarning(): boolean
-  toJSON(compact?: boolean): object
+  toJSON(): object
   map<U>(fn: (data: T) => U): Result<U>
   flatMap<U>(fn: (data: T) => Result<U>): Result<U>
 }

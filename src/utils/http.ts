@@ -1,5 +1,9 @@
 import type { Result } from '../core/types'
 
+const STATUS_OK = 200
+const STATUS_NO_CONTENT = 204
+const STATUS_BAD_REQUEST = 400
+
 /**
  * Infer HTTP status code from a Result.
  * 
@@ -31,7 +35,7 @@ export function inferStatus<T>(result: Result<T>): number {
   
   // 2. Success case - differentiate 200 vs 204
   if (result.isOk()) {
-    return result.data !== null ? 200 : 204
+    return result.data !== null ? STATUS_OK : STATUS_NO_CONTENT
   }
   
   // 3. Error case - find critical (5xx) errors first
@@ -44,7 +48,7 @@ export function inferStatus<T>(result: Result<T>): number {
   }
   
   // 4. Fallback: first error's status or 400
-  return result.errors[0]?.status ?? 400
+  return result.errors[0]?.status ?? STATUS_BAD_REQUEST
 }
 
 /**
@@ -52,7 +56,6 @@ export function inferStatus<T>(result: Result<T>): number {
  * Automatically infers status code and serializes body.
  * 
  * @param result - The Result to convert
- * @param compact - Whether to use compact JSON format (default: false)
  * @returns Object with status and body for HTTP response
  * 
  * @example
@@ -60,18 +63,13 @@ export function inferStatus<T>(result: Result<T>): number {
  * const result = ok(user)
  * const { status, body } = toHttpResponse(result)
  * res.status(status).json(body)
- * 
- * // With compact format for bandwidth savings
- * const { status, body } = toHttpResponse(result, true)
- * res.status(status).json(body)
  * ```
  */
 export function toHttpResponse<T>(
-  result: Result<T>,
-  compact = false
+  result: Result<T>
 ): { status: number; body: object } {
   return {
     status: inferStatus(result),
-    body: result.toJSON(compact)
+    body: result.toJSON()
   }
 }
