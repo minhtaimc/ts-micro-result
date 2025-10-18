@@ -3,7 +3,7 @@
 A tiny Result toolkit for TypeScript services, SDKs, and background jobs. Ship a single union for success, warnings, and failures that travels well across HTTP, gRPC, queues, CLIs, or any other channel you need.
 
 [![npm version](https://img.shields.io/npm/v/ts-micro-result.svg)](https://www.npmjs.com/package/ts-micro-result)
-![npm bundle size](https://img.shields.io/bundlephobia/min/ts-micro-mediator)
+![npm bundle size](https://img.shields.io/bundlephobia/min/ts-micro-result)
 [![npm downloads](https://img.shields.io/npm/dm/ts-micro-result.svg)](https://www.npmjs.com/package/ts-micro-result)
 [![license](https://img.shields.io/npm/l/ts-micro-result.svg)](https://github.com/minhtaimc/ts-micro-result/blob/main/LICENSE)
 
@@ -52,7 +52,7 @@ const status = inferStatus(result)  // 200 for success, 404 for not found
 - ✅ **Error chaining** - Track error causes through your app layers
 - ✅ **Functional** - `map` and `flatMap` for composable operations
 - ✅ **Tree-shakeable** - Import only what you need, modular architecture
-- ✅ **Edge optimized** - 70% less memory, ~5.8KB minified, works in all edge runtimes
+- ✅ **Ultra lightweight** - 10.9KB package, 2.89KB bundled, works in all edge runtimes
 - ✅ **Framework agnostic** - Works everywhere
 - ✅ **Zero dependencies** - No bloat
 
@@ -517,8 +517,9 @@ result.toJSON()  // Returns JSON object
 
 ### Performance
 
-- **Bundle size:** ~5.8KB minified (full library)
-- **Tree-shakeable:** ~2.9KB for core only (ok/err)
+- **Package size:** 10.9KB (tarball), 35.8KB (unpacked)
+- **Bundle size:** 2.89KB minified (full library)
+- **Tree-shakeable:** ~0.8KB for core only (ok/err) with bundlers
 - **Memory:** 70% less per Result instance vs object literals
 - **Speed:** 50% faster creation, 20-30% faster method calls
 
@@ -773,212 +774,18 @@ Import only what you need to minimize bundle size.
 // ✅ Good - tree-shakeable, minimal bundle
 import { ok, err } from 'ts-micro-result'
 
-// ✅ Good - specific imports for maximum control
-import { ok } from 'ts-micro-result/factories/ok'
-import { err } from 'ts-micro-result/factories/err'
-
 // ❌ Avoid - imports everything
 import * as Result from 'ts-micro-result'
 ```
 
-**Bundle size by import:**
-- Core only (`ok`, `err`): ~2.9KB
-- + Error templates (`defineError`): +0.9KB
-- + Validation (`validationErrors`): +0.3KB
-- + Serialization (`fromJson`): +0.6KB
-- + HTTP utilities (`inferStatus`, `toHttpResponse`): +0.7KB
-- + Type guards (`isResult`): +0.4KB
-- Full library: ~5.8KB
-
-See the [Tree-Shaking Guide](#-tree-shaking-guide) section for detailed import strategies.
-
----
-
-## 🌲 Tree-Shaking Guide
-
-The library is fully tree-shakeable with modular architecture. Import only what you need to minimize bundle size.
-
-### Import Strategies
-
-**Strategy 1: Main Entry (Recommended for most cases)**
-```typescript
-// Import from main entry - bundler will tree-shake unused exports
-import { ok, err, defineError, inferStatus } from 'ts-micro-result'
-```
-
-**Strategy 2: Direct Module Imports (Maximum control)**
-```typescript
-// Core types (types only, no runtime code)
-import type { Result, ErrorDetail, ResultMeta, ErrorLevel } from 'ts-micro-result'
-
-// Factory functions
-import { ok } from 'ts-micro-result/factories/ok'
-import { err } from 'ts-micro-result/factories/err'
-import { defineError } from 'ts-micro-result/factories/errors'
-import { validationErrors } from 'ts-micro-result/factories/validation'
-
-// Utility functions
-import { fromJson } from 'ts-micro-result/utils/serialization'
-import { isResult } from 'ts-micro-result/utils/guards'
-import { inferStatus, toHttpResponse } from 'ts-micro-result/utils/http'
-
-// Core implementation
-import { ResultImpl } from 'ts-micro-result/core/result'
-```
-
-**Strategy 3: Mixed Approach (Best of both worlds)**
-```typescript
-// Import core from main entry
-import { ok, err, defineError } from 'ts-micro-result'
-
-// Import specific utilities for better tree-shaking
-import { inferStatus } from 'ts-micro-result/utils/http'
-import { fromJson } from 'ts-micro-result/utils/serialization'
-```
-
-### Bundle Size Analysis
-
-| Import Pattern | Bundle Size | What's Included | Use Case |
-|----------------|-------------|-----------------|----------|
-| `ok, err` only | ~2.9KB | ResultImpl class + factory functions | Minimal error handling |
-| `+ defineError` | +0.9KB | Error template system | Reusable error definitions |
-| `+ validationErrors` | +0.3KB | Validation helper | Form validation |
-| `+ fromJson` | +0.6KB | JSON serialization | API responses |
-| `+ isResult` | +0.4KB | Type guard | Runtime type checking |
-| `+ inferStatus, toHttpResponse` | +0.7KB | HTTP utilities | Web APIs |
-| `+ ResultImpl` | +0KB | Already included | Direct class usage |
-| **Full library** | **~5.8KB** | **Everything** | **Complete toolkit** |
-
-### Module-by-Module Breakdown
-
-| Module | Size | Dependencies | Exports |
-|--------|------|--------------|---------|
-| `core/result` | ~2.7KB | None | `ResultImpl` class |
-| `factories/ok` | ~0.2KB | `core/result` | `ok()` function |
-| `factories/err` | ~0.2KB | `core/result` | `err()` function |
-| `factories/errors` | ~0.9KB | `core/types` | `defineError()` function |
-| `factories/validation` | ~0.3KB | `factories/err`, `factories/errors` | `validationErrors()` function |
-| `utils/serialization` | ~0.6KB | `core/result`, `core/types` | `fromJson()` function |
-| `utils/guards` | ~0.4KB | `core/types` | `isResult()` function |
-| `utils/http` | ~0.7KB | `core/types` | `inferStatus()`, `toHttpResponse()` functions |
-
-### Common Import Patterns
-
-**Pattern 1: Minimal (Core Only)**
-```typescript
-// Only ok() and err() - smallest bundle
-import { ok, err } from 'ts-micro-result'
-
-// Bundle: ~2.9KB
-// Use when: Simple success/error handling, non-HTTP contexts
-// Example: CLI tools, background jobs, simple scripts
-```
-
-**Pattern 2: HTTP APIs (Recommended)**
-```typescript
-// Core + HTTP helpers + error templates
-import { ok, err, defineError, toHttpResponse } from 'ts-micro-result'
-
-// Bundle: ~4.5KB
-// Use when: Building HTTP APIs (Express, Fastify, etc.)
-// Example: REST APIs, GraphQL resolvers, web services
-```
-
-**Pattern 3: Full Featured**
-```typescript
-// Everything you need
-import { ok, err, defineError, validationErrors, fromJson, inferStatus } from 'ts-micro-result'
-
-// Bundle: ~5.8KB
-// Use when: Complex applications with validation, serialization, etc.
-// Example: Full-stack applications, microservices, enterprise apps
-```
-
-**Pattern 4: Edge Computing Optimized**
-```typescript
-// Minimal core for edge functions
-import { ok, err } from 'ts-micro-result'
-import { inferStatus } from 'ts-micro-result/utils/http'
-
-// Bundle: ~3.6KB
-// Use when: Cloudflare Workers, Vercel Edge Functions, etc.
-// Example: Edge APIs, CDN functions, serverless edge computing
-```
-
-**Pattern 5: Type-Safe Development**
-```typescript
-// Core + type guards + error templates
-import { ok, err, defineError, isResult } from 'ts-micro-result'
-
-// Bundle: ~4.2KB
-// Use when: Type-safe development, runtime validation
-// Example: Libraries, SDKs, shared utilities
-```
-
-### Tree-Shaking Best Practices
-
-**✅ Do:**
-```typescript
-// Import only what you need
-import { ok, err, defineError } from 'ts-micro-result'
-
-// Use specific imports for utilities
-import { inferStatus } from 'ts-micro-result/utils/http'
-
-// Import types separately (no runtime cost)
-import type { Result, ErrorDetail } from 'ts-micro-result'
-```
-
-**❌ Don't:**
-```typescript
-// Avoid importing everything
-import * as Result from 'ts-micro-result'
-
-// Avoid importing unused functions
-import { ok, err, defineError, validationErrors, fromJson, isResult } from 'ts-micro-result'
-// Only use: ok, err, defineError
-
-// Avoid importing the entire library when you only need core
-import { ok, err } from 'ts-micro-result'
-// This is fine - bundler will tree-shake unused exports
-```
-
-**🔧 Bundler Configuration:**
-
-**Webpack:**
-```javascript
-// webpack.config.js
-module.exports = {
-  optimization: {
-    usedExports: true,
-    sideEffects: false, // ts-micro-result has no side effects
-  }
-}
-```
-
-**Vite:**
-```javascript
-// vite.config.js
-export default {
-  build: {
-    rollupOptions: {
-      treeshake: {
-        moduleSideEffects: false
-      }
-    }
-  }
-}
-```
-
-**esbuild:**
-```javascript
-// esbuild.config.js
-export default {
-  bundle: true,
-  treeShaking: true,
-  // ts-micro-result is tree-shakeable by default
-}
-```
+**Bundle size by import (with bundlers like Webpack, Rollup, Vite):**
+- Core only (`ok`, `err`): ~0.8KB
+- + Error templates (`defineError`): +0.3KB
+- + Validation (`validationErrors`): +0.1KB
+- + Serialization (`fromJson`): +0.2KB
+- + HTTP utilities (`inferStatus`, `toHttpResponse`): +0.2KB
+- + Type guards (`isResult`): +0.1KB
+- Full library: ~2.89KB (unbundled), ~1.7KB (tree-shaken)
 
 ### File Structure Reference
 

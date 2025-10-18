@@ -1,6 +1,6 @@
 {
   "name": "ts-micro-result",
-  "version": "2.1.2",
+  "version": "2.1.3",
   "description": "Result toolkit for TypeScript services, SDKs, and background jobs",
   "type": "module",
   "main": "dist/index.js",
@@ -28,11 +28,12 @@
     "dist"
   ],
   "scripts": {
-    "build": "tsc && npm run minify",
-    "minify": "terser dist/index.js dist/core/result.js dist/core/types.js dist/factories/ok.js dist/factories/err.js dist/factories/errors.js dist/factories/validation.js dist/utils/guards.js dist/utils/http.js dist/utils/serialization.js --compress --mangle --module -d dist",
+    "build": "npm run clean && npm run build:types && npm run build:bundle",
+    "build:types": "tsc --emitDeclarationOnly",
+    "build:bundle": "node esbuild.config.js",
     "dev": "tsc --watch",
     "clean": "rimraf dist",
-    "prepublishOnly": "npm run clean && npm run build"
+    "prepublishOnly": "npm run build"
   },
   "keywords": [
     "typescript",
@@ -45,8 +46,8 @@
   "author": "minhtaimc",
   "license": "MIT",
   "devDependencies": {
+    "esbuild": "^0.25.11",
     "rimraf": "^5.0.0",
-    "terser": "^5.44.0",
     "typescript": "^5.0.0"
   },
   "repository": {
