@@ -1,5 +1,13 @@
 import type { ErrorDetail, ErrorLevel } from '../core/types.js'
 
+// Base params that are always available (but optional)
+export interface BaseErrorParams {
+  path?: string
+  meta?: Record<string, unknown>
+  cause?: ErrorDetail
+  message?: string  // Allow message override
+}
+
 // Extract template variable names from template string
 // "User {id} not found" → "id"
 // "Field {field} must be {type}" → "field" | "type"
@@ -11,14 +19,6 @@ type ExtractTemplateVars<T extends string> =
 // Check if template has any variables
 type HasTemplateVars<T extends string> = ExtractTemplateVars<T> extends never ? false : true
 
-// Base params that are always available (but optional)
-interface BaseErrorParams {
-  path?: string
-  meta?: Record<string, unknown>
-  cause?: ErrorDetail
-  message?: string  // Allow message override
-}
-
 // Conditional params type based on whether template has variables
 // If template has variables: require those variables, base params are optional
 // If no variables: all params are optional
@@ -28,30 +28,30 @@ type ErrorParams<TTemplate extends string> =
     : Partial<BaseErrorParams> | undefined
 
 /**
- * Define a reusable error with optional template interpolation
+ * Advanced error factory with template interpolation and complex TypeScript types
  * 
  * @example
  * // Simple error without template
- * const genericError = defineError('GENERIC', 'Something went wrong')
+ * const genericError = defineErrorAdvanced('GENERIC', 'Something went wrong')
  * genericError() // No params needed
  * 
  * @example
  * // Error with template - TypeScript will autocomplete params!
- * const userError = defineError('USER_NOT_FOUND', 'User {id} not found', 404)
+ * const userError = defineErrorAdvanced('USER_NOT_FOUND', 'User {id} not found', 404)
  * userError({ id: 123 }) // TypeScript suggests: { id: any, path?: string, meta?: ..., cause?: ... }
  * 
  * @example
  * // Error with multiple template variables
- * const validationError = defineError('VALIDATION', 'Field {field} must be {type}', 400)
+ * const validationError = defineErrorAdvanced('VALIDATION', 'Field {field} must be {type}', 400)
  * validationError({ field: 'email', type: 'string' })
  * 
  * @example
  * // Error chaining
- * const dbError = defineError('DB_ERROR', 'Database error', 500)
- * const userError = defineError('USER_CREATE_FAILED', 'Failed to create user', 500)
+ * const dbError = defineErrorAdvanced('DB_ERROR', 'Database error', 500)
+ * const userError = defineErrorAdvanced('USER_CREATE_FAILED', 'Failed to create user', 500)
  * userError({ cause: dbError({ message: 'Connection timeout' }) })
  */
-export function defineError<
+export function defineErrorAdvanced<
   TCode extends string,
   TTemplate extends string
 >(

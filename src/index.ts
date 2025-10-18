@@ -7,7 +7,9 @@ export { ResultImpl } from './core/result.js'
 // Factory functions
 export { ok } from './factories/ok.js'
 export { err } from './factories/err.js'
-export { defineError } from './factories/errors.js'
+export { defineError } from './factories/errors-simple.js'
+export type { BaseErrorParams } from './factories/errors-simple.js'
+export { defineErrorAdvanced } from './factories/errors-advanced.js'
 export { validationErrors } from './factories/validation.js'
 
 // Utility functions
