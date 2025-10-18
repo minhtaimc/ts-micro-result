@@ -1,5 +1,5 @@
-import type { ErrorDetail, Result, ResultMeta } from '../core/types'
-import { createResult } from '../core/result'
+import type { ErrorDetail, Result, ResultMeta } from '../core/types.js'
+import { ResultImpl } from '../core/result.js'
 
 export function err(
   error: ErrorDetail | ErrorDetail[],
@@ -7,5 +7,5 @@ export function err(
   status?: number
 ): Result<never> {
   const errors = Array.isArray(error) ? error : [error]
-  return createResult<never>(null, errors, status, meta)
+  return new ResultImpl<never>(null, errors, status, meta)
 }

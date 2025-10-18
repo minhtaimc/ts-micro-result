@@ -1,4 +1,4 @@
-import type { ErrorDetail, ErrorLevel } from '../core/types'
+import type { ErrorDetail, ErrorLevel } from '../core/types.js'
 
 // Extract template variable names from template string
 // "User {id} not found" → "id"

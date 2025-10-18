@@ -1,5 +1,5 @@
-import type { Result, SerializedResult } from '../core/types'
-import { createResult } from '../core/result'
+import type { Result, SerializedResult } from '../core/types.js'
+import { ResultImpl } from '../core/result.js'
 
 export function fromJson<T = unknown>(json: string): Result<T> {
   try {
@@ -9,14 +9,14 @@ export function fromJson<T = unknown>(json: string): Result<T> {
       throw new Error('Invalid JSON')
     }
     
-    return createResult<T>(
+    return new ResultImpl<T>(
       parsed.data as T | null,
       parsed.errors,
       parsed.status,
       parsed.meta
     )
   } catch (err) {
-    return createResult<T>(null, [{
+    return new ResultImpl<T>(null, [{
       code: 'INVALID_JSON',
       message: err instanceof Error ? err.message : 'Invalid JSON',
       status: 400,

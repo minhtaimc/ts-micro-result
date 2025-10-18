@@ -1,6 +1,6 @@
-import type { Result } from '../core/types'
-import { err } from './err'
-import { defineError } from './errors'
+import type { Result } from '../core/types.js'
+import { err } from './err.js'
+import { defineError } from './errors.js'
 
 const validationError = defineError("VALIDATION_ERROR", "Invalid input data", 400)
 

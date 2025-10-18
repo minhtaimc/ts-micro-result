@@ -1,4 +1,4 @@
-import type { Result } from '../core/types'
+import type { Result } from '../core/types.js'
 
 export function isResult<T = unknown>(value: unknown): value is Result<T> {
   if (typeof value !== 'object' || value === null) {

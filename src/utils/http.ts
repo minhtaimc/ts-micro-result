@@ -1,4 +1,4 @@
-import type { Result } from '../core/types'
+import type { Result } from '../core/types.js'
 
 const STATUS_OK = 200
 const STATUS_NO_CONTENT = 204

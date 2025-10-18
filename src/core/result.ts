@@ -113,11 +113,3 @@ export class ResultImpl<T> implements Result<T> {
   }
 }
 
-export function createResult<T>(
-  data: T | null,
-  errors: ErrorDetail[],
-  status?: number,
-  meta?: ResultMeta
-): Result<T> {
-  return new ResultImpl(data, errors, status, meta)
-}
