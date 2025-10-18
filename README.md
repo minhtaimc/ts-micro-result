@@ -16,7 +16,10 @@ npm install ts-micro-result
 ```
 
 ```typescript
-import { ok, err, defineError, inferStatus } from 'ts-micro-result'
+// For minimal bundle size, use subpath imports
+import { ok, err } from 'ts-micro-result/lite'
+import { defineError } from 'ts-micro-result/factories/errors'
+import { inferStatus } from 'ts-micro-result/utils/http'
 
 // Define reusable errors
 const NotFound = defineError('NOT_FOUND', 'User {id} not found', 404)
@@ -771,27 +774,32 @@ async function processOrder(orderId: string) {
 Import only what you need to minimize bundle size.
 
 ```typescript
-// ✅ Good - tree-shakeable, minimal bundle
+// ✅ Good - minimal bundle with subpath imports
+import { ok } from 'ts-micro-result/factories/ok'
+import { err } from 'ts-micro-result/factories/err'
+
+// ✅ Good - lite entry for core functionality
+import { ok, err } from 'ts-micro-result/lite'
+
+// ❌ Avoid - imports everything from main entry
 import { ok, err } from 'ts-micro-result'
 
 // ❌ Avoid - imports everything
 import * as Result from 'ts-micro-result'
 ```
 
-**Bundle size by import (with bundlers like Webpack, Rollup, Vite):**
-- Core only (`ok`, `err`): ~0.8KB
-- + Error templates (`defineError`): +0.3KB
-- + Validation (`validationErrors`): +0.1KB
-- + Serialization (`fromJson`): +0.2KB
-- + HTTP utilities (`inferStatus`, `toHttpResponse`): +0.2KB
-- + Type guards (`isResult`): +0.1KB
-- Full library: ~2.89KB (unbundled), ~1.7KB (tree-shaken)
+**Bundle size by import strategy:**
+- Subpath imports (factories/ok, factories/err): ~0.8KB
+- Lite entry (ts-micro-result/lite): ~1.2KB
+- Main entry (ts-micro-result): ~2.89KB (full library)
 
-### File Structure Reference
+### Package Structure & Import Reference
 
+**Source Code Structure:**
 ```
 ts-micro-result/
 ├── index.ts                    # Main entry (re-exports everything)
+├── lite.ts                     # Minimal entry (core only)
 ├── core/
 │   ├── types.ts               # TypeScript types only
 │   └── result.ts              # ResultImpl class implementation
@@ -805,6 +813,19 @@ ts-micro-result/
     ├── guards.ts              # isResult() function
     └── http.ts                # inferStatus(), toHttpResponse() functions
 ```
+
+**Package Import Paths:**
+- `ts-micro-result` → Main entry (full library)
+- `ts-micro-result/lite` → Minimal entry (core only)
+- `ts-micro-result/core/types` → TypeScript types only
+- `ts-micro-result/core/result` → ResultImpl class
+- `ts-micro-result/factories/ok` → ok() function
+- `ts-micro-result/factories/err` → err() function
+- `ts-micro-result/factories/errors` → defineError() function
+- `ts-micro-result/factories/validation` → validationErrors() function
+- `ts-micro-result/utils/serialization` → fromJson() function
+- `ts-micro-result/utils/guards` → isResult() function
+- `ts-micro-result/utils/http` → inferStatus(), toHttpResponse() functions
 
 
 
