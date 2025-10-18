@@ -55,12 +55,7 @@ export class ResultImpl<T> implements Result<T> {
     if (this.data != null) result.data = this.data
     if (this.status !== undefined) result.status = this.status
     
-    // Manual copy for performance
-    if (this.meta) {
-      for (const key in this.meta) {
-        result[key] = this.meta[key]
-      }
-    }
+    if (this.meta) result.meta = this.meta
     
     return result
   }
