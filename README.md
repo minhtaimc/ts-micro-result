@@ -16,9 +16,12 @@ npm install ts-micro-result
 ```
 
 ```typescript
-// For minimal bundle size, use subpath imports
+// All imports support tree-shaking - bundler will only include what you use
+import { ok, err, defineError, defineErrorAdvanced, inferStatus } from 'ts-micro-result'
+
+// Or use subpath imports for specific functionality
 import { ok, err } from 'ts-micro-result/lite'
-import { defineError, defineErrorAdvanced } from 'ts-micro-result'
+import { defineError } from 'ts-micro-result/factories/errors-simple'
 import { inferStatus } from 'ts-micro-result/utils/http'
 
 // Simple error (no template interpolation)
@@ -47,6 +50,8 @@ const status = inferStatus(result)  // 200 for success, 404 for not found
 ```
 
 **That's it!** You now have type-safe, predictable error handling. 🎉
+
+**Note:** All import strategies support tree-shaking - your bundler will automatically optimize bundle size by only including the functions you actually use.
 
 ---
 
@@ -859,27 +864,66 @@ async function processOrder(orderId: string) {
 
 ### 7. Optimize Bundle Size with Tree-Shaking
 
-Import only what you need to minimize bundle size.
+All import strategies support tree-shaking! Modern bundlers will only include what you actually use.
 
 ```typescript
-// ✅ Good - minimal bundle with subpath imports
-import { ok } from 'ts-micro-result/factories/ok'
-import { err } from 'ts-micro-result/factories/err'
+// ✅ All of these support tree-shaking - choose based on your needs
 
-// ✅ Good - lite entry for core functionality
+// Option 1: Root import (convenient, bundler optimizes automatically)
+import { ok, err, defineError, inferStatus } from 'ts-micro-result'
+
+// Option 2: Lite entry (minimal for basic usage)
 import { ok, err } from 'ts-micro-result/lite'
 
-// ❌ Avoid - imports everything from main entry
-import { ok, err } from 'ts-micro-result'
+// Option 3: Subpath imports (granular control)
+import { ok } from 'ts-micro-result/factories/ok'
+import { err } from 'ts-micro-result/factories/err'
+import { defineError } from 'ts-micro-result/factories/errors-simple'
 
 // ❌ Avoid - imports everything
 import * as Result from 'ts-micro-result'
 ```
 
-**Bundle size by import strategy:**
-- Subpath imports (factories/ok, factories/err): ~0.8KB
-- Lite entry (ts-micro-result/lite): ~1.2KB
-- Main entry (ts-micro-result): ~2.89KB (full library)
+**Bundle size by import strategy (when using only `ok` and `err`):**
+- Root import: ~200-300 bytes (bundler tree-shakes unused exports)
+- Lite entry: ~129 bytes (minimal bundle)
+- Subpath imports: ~410 bytes (core + factories)
+- Full library: ~2.89KB (if you use everything)
+
+**Recommendations:**
+- Use **root import** for convenience - bundler handles optimization
+- Use **lite entry** for minimal bundle size
+- Use **subpath imports** for granular control
+
+### 🌳 Tree-Shaking Explained
+
+Modern bundlers (Webpack, Rollup, Vite) are smart enough to tree-shake even root imports:
+
+```typescript
+// This import...
+import { ok, err } from 'ts-micro-result'
+
+// ...becomes this in your bundle (only what you use):
+// - ok function
+// - err function  
+// - ResultImpl class (dependency)
+// - Required types
+
+// Bundler automatically excludes:
+// - defineError
+// - defineErrorAdvanced
+// - validationErrors
+// - fromJson
+// - isResult
+// - inferStatus
+// - toHttpResponse
+```
+
+**Why root import is still efficient:**
+- ✅ Bundler analyzes your code and only includes used exports
+- ✅ No need to worry about import paths
+- ✅ Single import statement for multiple functions
+- ✅ Automatic dependency resolution
 
 ### Package Structure & Import Reference
 
@@ -904,8 +948,8 @@ ts-micro-result/
 ```
 
 **Package Import Paths:**
-- `ts-micro-result` → Main entry (full library)
-- `ts-micro-result/lite` → Minimal entry (core only)
+- `ts-micro-result` → Main entry (full library, tree-shakeable)
+- `ts-micro-result/lite` → Minimal entry (core only, ~129 bytes)
 - `ts-micro-result/core/types` → TypeScript types only
 - `ts-micro-result/core/result` → ResultImpl class
 - `ts-micro-result/factories/ok` → ok() function
@@ -916,6 +960,12 @@ ts-micro-result/
 - `ts-micro-result/utils/serialization` → fromJson() function
 - `ts-micro-result/utils/guards` → isResult() function
 - `ts-micro-result/utils/http` → inferStatus(), toHttpResponse() functions
+
+**Tree-shaking support:**
+- ✅ All import paths support tree-shaking
+- ✅ Root import automatically optimized by bundler
+- ✅ Subpath imports for granular control
+- ✅ Lite entry for minimal bundle size
 
 
 
