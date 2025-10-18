@@ -167,7 +167,7 @@ import { ok, inferStatus } from 'ts-micro-result'
 
 const result = ok(user)
 res.status(inferStatus(result)).json(result.toJSON())
-// inferStatus() returns 200 (has data) or 204 (no data)
+// inferStatus() returns 200
 ```
 
 **HTTP contexts - Option 3 (Helper function):**
@@ -183,7 +183,6 @@ res.status(status).json(body)
 **Why this matters:**
 - ✅ Smaller JSON payloads for non-HTTP contexts
 - ✅ Flexible: set status explicitly or infer when needed
-- ✅ Smart inference: 200 vs 204 based on data presence
 - ✅ Works seamlessly across different transport layers
 
 
@@ -374,7 +373,7 @@ Create a success result.
 ```typescript
 ok({ id: 1, name: 'John' })
 ok(users, { pagination: { page: 1, pageSize: 10, total: 100 } })
-ok()  // Void success (status: 204)
+ok()  // Void success (status: 200)
 ```
 
 #### `err(error, meta?, status?)`
@@ -498,7 +497,7 @@ Infer HTTP status code from a Result when status is not explicitly set.
 
 **Priority:**
 1. Explicit status if set
-2. For success: 200 if has data, 204 if no data
+2. For success: 200
 3. For errors: First 5xx error, or first error's status, or 400
 
 ```typescript
@@ -510,7 +509,7 @@ inferStatus(result)  // 200
 
 // Success without data
 const empty = ok()
-inferStatus(empty)  // 204
+inferStatus(empty)  // 200
 
 // Error with status
 const NotFound = defineError('NOT_FOUND', 'User not found', 404)

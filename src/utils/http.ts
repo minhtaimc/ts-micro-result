@@ -1,7 +1,6 @@
 import type { Result } from '../core/types.js'
 
 const STATUS_OK = 200
-const STATUS_NO_CONTENT = 204
 const STATUS_BAD_REQUEST = 400
 
 /**
@@ -9,7 +8,7 @@ const STATUS_BAD_REQUEST = 400
  * 
  * Priority:
  * 1. Explicit status if set
- * 2. For success: 200 if has data, 204 if no data
+ * 2. For success: 200
  * 3. For errors: First 5xx error, or first error's status, or 400
  * 
  * @param result - The Result to infer status from
@@ -21,7 +20,7 @@ const STATUS_BAD_REQUEST = 400
  * inferStatus(result) // 200 (has data)
  * 
  * const empty = ok()
- * inferStatus(empty) // 204 (no data)
+ * inferStatus(empty) // 200 (no data)
  * 
  * const error = err(NotFound())
  * inferStatus(error) // 404 (from error)
@@ -33,9 +32,9 @@ export function inferStatus<T>(result: Result<T>): number {
     return result.status
   }
   
-  // 2. Success case - differentiate 200 vs 204
+  // 2. Success case - always 200
   if (result.isOk()) {
-    return result.data !== null ? STATUS_OK : STATUS_NO_CONTENT
+    return STATUS_OK
   }
   
   // 3. Error case - find critical (5xx) errors first

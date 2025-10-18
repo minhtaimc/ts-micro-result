@@ -1,6 +1,6 @@
 {
   "name": "ts-micro-result",
-  "version": "2.1.9",
+  "version": "2.1.10",
   "description": "Result toolkit for TypeScript services, SDKs, and background jobs",
   "type": "module",
   "main": "dist/index.js",

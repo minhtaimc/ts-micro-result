@@ -20,7 +20,6 @@ export function fromJSON<T = unknown>(json: string): Result<T> {
       code: 'INVALID_JSON',
       message: err instanceof Error ? err.message : 'Invalid JSON',
       status: 400,
-      level: 'error'
     }], 400)
   }
 }
