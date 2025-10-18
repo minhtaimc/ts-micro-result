@@ -13,6 +13,6 @@ export { defineErrorAdvanced } from './factories/errors-advanced.js'
 export { validationErrors } from './factories/validation.js'
 
 // Utility functions
-export { fromJson } from './utils/serialization.js'
+export { fromJSON } from './utils/serialization.js'
 export { isResult } from './utils/guards.js'
 export { inferStatus, toHttpResponse } from './utils/http.js'

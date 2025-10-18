@@ -474,12 +474,12 @@ const result = new ResultImpl({ data: 'test' }, [])
 
 ### Utility Functions
 
-#### `fromJson(json)`
+#### `fromJSON(json)`
 
 Parse JSON to Result. 
 
 ```typescript
-const result = fromJson('{"errors":[{"code":"ERROR","message":"Failed"}]}')
+const result = fromJSON('{"errors":[{"code":"ERROR","message":"Failed"}]}')
 ```
 
 #### `isResult(value)`
@@ -913,7 +913,7 @@ import { ok, err } from 'ts-micro-result'
 // - defineError
 // - defineErrorAdvanced
 // - validationErrors
-// - fromJson
+// - fromJSON
 // - isResult
 // - inferStatus
 // - toHttpResponse
@@ -942,7 +942,7 @@ ts-micro-result/
 │   ├── errors-advanced.ts     # defineErrorAdvanced() function (with templates)
 │   └── validation.ts          # validationErrors() function
 └── utils/
-    ├── serialization.ts       # fromJson() function
+    ├── serialization.ts       # fromJSON() function
     ├── guards.ts              # isResult() function
     └── http.ts                # inferStatus(), toHttpResponse() functions
 ```
@@ -957,7 +957,7 @@ ts-micro-result/
 - `ts-micro-result/factories/errors-simple` → defineError() function (simple)
 - `ts-micro-result/factories/errors-advanced` → defineErrorAdvanced() function (with templates)
 - `ts-micro-result/factories/validation` → validationErrors() function
-- `ts-micro-result/utils/serialization` → fromJson() function
+- `ts-micro-result/utils/serialization` → fromJSON() function
 - `ts-micro-result/utils/guards` → isResult() function
 - `ts-micro-result/utils/http` → inferStatus(), toHttpResponse() functions
 

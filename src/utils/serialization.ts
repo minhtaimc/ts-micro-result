@@ -1,7 +1,7 @@
 import type { Result, SerializedResult } from '../core/types.js'
 import { ResultImpl } from '../core/result.js'
 
-export function fromJson<T = unknown>(json: string): Result<T> {
+export function fromJSON<T = unknown>(json: string): Result<T> {
   try {
     const parsed = JSON.parse(json) as SerializedResult
     
