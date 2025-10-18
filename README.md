@@ -18,16 +18,19 @@ npm install ts-micro-result
 ```typescript
 // For minimal bundle size, use subpath imports
 import { ok, err } from 'ts-micro-result/lite'
-import { defineError } from 'ts-micro-result/factories/errors'
+import { defineError, defineErrorAdvanced } from 'ts-micro-result'
 import { inferStatus } from 'ts-micro-result/utils/http'
 
-// Define reusable errors
-const NotFound = defineError('NOT_FOUND', 'User {id} not found', 404)
+// Simple error (no template interpolation)
+const NotFound = defineError('NOT_FOUND', 'User not found', 404)
+
+// Advanced error with template interpolation
+const UserNotFound = defineErrorAdvanced('USER_NOT_FOUND', 'User {id} not found', 404)
 
 // Return Results from your functions
 async function getUser(id: string) {
   const user = await db.findUser(id)
-  if (!user) return err(NotFound({ id }))
+  if (!user) return err(UserNotFound({ id }))  // Template interpolation
   return ok(user)
 }
 
@@ -51,7 +54,7 @@ const status = inferStatus(result)  // 200 for success, 404 for not found
 
 - ✅ **Predictable structure** - `data`, `errors`, `status`, `meta` on every response
 - ✅ **Type-safe** - Full TypeScript support with smart type guards
-- ✅ **Error templates** - Dynamic messages with autocomplete: `'User {id} not found'`
+- ✅ **Error templates** - Two versions: simple `defineError()` and advanced `defineErrorAdvanced()` with template interpolation
 - ✅ **Error chaining** - Track error causes through your app layers
 - ✅ **Functional** - `map` and `flatMap` for composable operations
 - ✅ **Tree-shakeable** - Import only what you need, modular architecture
@@ -186,10 +189,13 @@ res.status(status).json(body)
 ### Basic CRUD Operations
 
 ```typescript
-import { ok, err, defineError } from 'ts-micro-result'
+import { ok, err, defineError, defineErrorAdvanced } from 'ts-micro-result'
 
-const NotFound = defineError('NOT_FOUND', '{resource} {id} not found', 404)
+// Simple errors (no template interpolation)
 const ServerError = defineError('SERVER_ERROR', 'Internal server error', 500)
+
+// Advanced errors with template interpolation
+const NotFound = defineErrorAdvanced('NOT_FOUND', '{resource} {id} not found', 404)
 
 async function getUser(id: string) {
   try {
@@ -266,7 +272,7 @@ function validateUser(data: any) {
 ### Error Chaining
 
 ```typescript
-const dbError = defineError('DB_ERROR', 'Database error: {reason}', 500)
+const dbError = defineErrorAdvanced('DB_ERROR', 'Database error: {reason}', 500)
 const userError = defineError('USER_CREATE_FAILED', 'Failed to create user', 500)
 
 async function createUser(data: any) {
@@ -289,6 +295,65 @@ async function createUser(data: any) {
 //     message: 'Database error: Connection timeout'
 //   }
 // }
+```
+
+---
+
+## 🎯 Choosing Between Error Factories
+
+### `defineError()` - Simple Version
+**Use when:** You need basic error creation without template interpolation.
+
+```typescript
+import { defineError } from 'ts-micro-result'
+
+// ✅ Good for simple, static messages
+const NotFound = defineError('NOT_FOUND', 'User not found', 404)
+const ServerError = defineError('SERVER_ERROR', 'Internal server error', 500)
+
+// Usage
+NotFound()  // { code: 'NOT_FOUND', message: 'User not found', status: 404 }
+NotFound({ message: 'Custom message', path: 'user.id' })  // With overrides
+```
+
+**Benefits:**
+- ✅ Smaller bundle size (no template parsing)
+- ✅ Simpler API
+- ✅ Better performance
+- ✅ Perfect for 90% of use cases
+
+### `defineErrorAdvanced()` - Advanced Version
+**Use when:** You need template interpolation with TypeScript autocomplete.
+
+```typescript
+import { defineErrorAdvanced } from 'ts-micro-result'
+
+// ✅ Good for dynamic messages with variables
+const UserNotFound = defineErrorAdvanced('USER_NOT_FOUND', 'User {id} not found', 404)
+const ValidationError = defineErrorAdvanced('VALIDATION', 'Field {field} must be {type}', 400)
+
+// Usage with TypeScript autocomplete
+UserNotFound({ id: 123 })  // { code: 'USER_NOT_FOUND', message: 'User 123 not found', status: 404 }
+ValidationError({ field: 'email', type: 'string' })  // TypeScript suggests: { field, type }
+```
+
+**Benefits:**
+- ✅ Template interpolation
+- ✅ TypeScript autocomplete for template variables
+- ✅ Dynamic, context-aware messages
+- ✅ Perfect for complex error scenarios
+
+### Bundle Size Impact
+
+```typescript
+// Minimal bundle - only simple version
+import { defineError } from 'ts-micro-result/factories/errors-simple'
+
+// Minimal bundle - only advanced version  
+import { defineErrorAdvanced } from 'ts-micro-result/factories/errors-advanced'
+
+// Both versions (larger bundle)
+import { defineError, defineErrorAdvanced } from 'ts-micro-result'
 ```
 
 ---
@@ -319,25 +384,48 @@ err([
 ])
 ```
 
-#### `defineError(code, template, status?, level?)`
+#### `defineError(code, message, status?, level?)`
 
-Define reusable error templates with TypeScript autocomplete.
+Simple error factory - no template interpolation, just basic functionality.
+
+```typescript
+// Basic usage
+const userNotFound = defineError('USER_NOT_FOUND', 'User not found', 404)
+userNotFound()  // { code: 'USER_NOT_FOUND', message: 'User not found', status: 404 }
+
+// With overrides
+userNotFound({ 
+  message: 'User with ID 123 not found',
+  path: 'user.id',
+  meta: { userId: 123 }
+})
+
+// Error chaining
+const dbError = defineError('DB_ERROR', 'Database error', 500)
+const chainedError = userNotFound({ 
+  cause: dbError({ message: 'Connection timeout' })
+})
+```
+
+#### `defineErrorAdvanced(code, template, status?, level?)`
+
+Advanced error factory with template interpolation and complex TypeScript types.
 
 ```typescript
 // Simple template
-const userNotFound = defineError('USER_NOT_FOUND', 'User {id} not found', 404)
+const userNotFound = defineErrorAdvanced('USER_NOT_FOUND', 'User {id} not found', 404)
 userNotFound({ id: 123 })  // TypeScript autocompletes: { id }
 
 // Multiple variables
-const validation = defineError('VALIDATION', 'Field {field} must be {type}', 400)
+const validation = defineErrorAdvanced('VALIDATION', 'Field {field} must be {type}', 400)
 validation({ field: 'email', type: 'string' })
 
 // No variables
-const genericError = defineError('GENERIC', 'Something went wrong')
+const genericError = defineErrorAdvanced('GENERIC', 'Something went wrong')
 genericError()  // No params needed
 
 // Optional status (for non-HTTP contexts)
-const logicError = defineError('LOGIC_ERROR', 'Invalid operation: {op}')
+const logicError = defineErrorAdvanced('LOGIC_ERROR', 'Invalid operation: {op}')
 ```
 
 #### `validationErrors(errors)`
@@ -586,15 +674,15 @@ Group related errors together for better organization and maintainability. TypeS
 ```typescript
 // errors/user.ts
 export const UserErrors = {
-  NotFound: defineError('USER_NOT_FOUND', 'User {id} not found', 404),
+  NotFound: defineErrorAdvanced('USER_NOT_FOUND', 'User {id} not found', 404),
   Unauthorized: defineError('USER_UNAUTHORIZED', 'Unauthorized', 401),
-  InvalidEmail: defineError('USER_INVALID_EMAIL', 'Invalid email: {email}', 400)
+  InvalidEmail: defineErrorAdvanced('USER_INVALID_EMAIL', 'Invalid email: {email}', 400)
 } as const
 
 // errors/product.ts
 export const ProductErrors = {
-  NotFound: defineError('PRODUCT_NOT_FOUND', 'Product {id} not found', 404),
-  OutOfStock: defineError('PRODUCT_OUT_OF_STOCK', 'Product {id} out of stock', 409)
+  NotFound: defineErrorAdvanced('PRODUCT_NOT_FOUND', 'Product {id} not found', 404),
+  OutOfStock: defineErrorAdvanced('PRODUCT_OUT_OF_STOCK', 'Product {id} out of stock', 409)
 } as const
 
 // Usage - clean and discoverable
@@ -610,7 +698,7 @@ function getUser(id: number) {
 Define error templates with placeholders. TypeScript will autocomplete only the template variables you need.
 
 ```typescript
-const userError = defineError('USER_NOT_FOUND', 'User {id} not found', 404)
+const userError = defineErrorAdvanced('USER_NOT_FOUND', 'User {id} not found', 404)
 
 // TypeScript autocomplete shows: { id }
 userError({ id: 123 })  // ✅ Clean, focused autocomplete
@@ -627,15 +715,15 @@ userError({
 
 ```typescript
 // Simple template
-const notFound = defineError('NOT_FOUND', '{resource} {id} not found', 404)
+const notFound = defineErrorAdvanced('NOT_FOUND', '{resource} {id} not found', 404)
 notFound({ resource: 'User', id: 123 })
 
 // Multiple variables
-const validation = defineError('VALIDATION', 'Field {field} must be {type}', 400)
+const validation = defineErrorAdvanced('VALIDATION', 'Field {field} must be {type}', 400)
 validation({ field: 'email', type: 'string' })
 
 // No variables
-const genericError = defineError('GENERIC', 'Something went wrong')
+const genericError = defineErrorAdvanced('GENERIC', 'Something went wrong')
 genericError()  // No params needed
 ```
 
@@ -658,7 +746,7 @@ const ageError = defineError('INVALID_AGE', 'Age is invalid', 400)
 Preserve the full error context by chaining errors through your application layers.
 
 ```typescript
-const dbError = defineError('DB_ERROR', 'Database error: {reason}', 500)
+const dbError = defineErrorAdvanced('DB_ERROR', 'Database error: {reason}', 500)
 const serviceError = defineError('SERVICE_ERROR', 'Service failed', 500)
 
 async function createUser(data: any) {
@@ -806,7 +894,8 @@ ts-micro-result/
 ├── factories/
 │   ├── ok.ts                  # ok() function
 │   ├── err.ts                 # err() function
-│   ├── errors.ts              # defineError() function
+│   ├── errors-simple.ts       # defineError() function (simple)
+│   ├── errors-advanced.ts     # defineErrorAdvanced() function (with templates)
 │   └── validation.ts          # validationErrors() function
 └── utils/
     ├── serialization.ts       # fromJson() function
@@ -821,7 +910,8 @@ ts-micro-result/
 - `ts-micro-result/core/result` → ResultImpl class
 - `ts-micro-result/factories/ok` → ok() function
 - `ts-micro-result/factories/err` → err() function
-- `ts-micro-result/factories/errors` → defineError() function
+- `ts-micro-result/factories/errors-simple` → defineError() function (simple)
+- `ts-micro-result/factories/errors-advanced` → defineErrorAdvanced() function (with templates)
 - `ts-micro-result/factories/validation` → validationErrors() function
 - `ts-micro-result/utils/serialization` → fromJson() function
 - `ts-micro-result/utils/guards` → isResult() function
